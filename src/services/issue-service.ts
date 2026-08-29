@@ -46,7 +46,11 @@ export class IssueService {
     const inFlightRequest = this.inFlightRequests.get(dedupeKey);
     if (inFlightRequest) {
       this.logger.info({ dedupeKey, instance: input.instance, installationId: input.installationId }, 'Coalescing concurrent duplicate issue request');
-      return inFlightRequest;
+      const response = await inFlightRequest;
+      return {
+        ...response,
+        created: false,
+      };
     }
 
     const createIssuePromise = (async () => {

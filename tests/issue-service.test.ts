@@ -103,6 +103,8 @@ test('createIssue coalesces concurrent duplicate requests before creating a GitH
     service.createIssue(request),
   ]);
 
+  assert.equal(firstResponse.created, true);
+  assert.equal(secondResponse.created, false);
   assert.equal(firstResponse.issueNumber, 78);
   assert.equal(secondResponse.issueNumber, 78);
   assert.equal(createCallCount, 1);
