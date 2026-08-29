@@ -383,6 +383,8 @@ The chart follows the same runtime design as the Node.js app:
 - `ingress.enabled`: expose the service externally
 - `certificate.enabled`: create a cert-manager `Certificate` for the ingress hosts
 
+If `credentials.create=true`, all entries in `credentials.data` must be set explicitly. The chart no longer ships placeholder credential values.
+
 ### Install with Helm
 
 ```bash

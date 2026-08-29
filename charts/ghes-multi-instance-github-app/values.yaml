@@ -110,9 +110,9 @@ credentials:
   existingSecret: ""
   create: true
   data:
-    GHES1_APP_ID: "11"
-    GHES1_PRIVATE_KEY: "Dummy"
-    GHES1_WEBHOOK_SECRET: "Dummy"
-    GHES2_APP_ID: "1"
-    GHES2_PRIVATE_KEY: "Dummy"
-    GHES2_WEBHOOK_SECRET: "Dummy"
+    GHES1_APP_ID: ""
+    GHES1_PRIVATE_KEY: ""
+    GHES1_WEBHOOK_SECRET: ""
+    GHES2_APP_ID: ""
+    GHES2_PRIVATE_KEY: ""
+    GHES2_WEBHOOK_SECRET: ""

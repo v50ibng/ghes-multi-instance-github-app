@@ -28,7 +28,7 @@ spec:
     {{- end }}
     {{- end }}
   issuerRef:
-    name: {{ .Values.certificate.issuerRef.name | quote }}
+    name: {{ required "certificate.issuerRef.name is required when certificate.enabled=true" .Values.certificate.issuerRef.name | quote }}
     kind: {{ .Values.certificate.issuerRef.kind | quote }}
     {{- with .Values.certificate.issuerRef.group }}
     group: {{ . | quote }}
