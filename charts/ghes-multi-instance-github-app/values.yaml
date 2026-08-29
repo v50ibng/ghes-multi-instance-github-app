@@ -94,13 +94,13 @@ app:
   instances:
     - key: ghes1
       name: GHES 1
-      baseUrl: https://vwg.ghe.com/
+      baseUrl: https://ghes1.company.com
       appIdEnv: GHES1_APP_ID
       privateKeyEnv: GHES1_PRIVATE_KEY
       webhookSecretEnv: GHES1_WEBHOOK_SECRET
     - key: ghes2
       name: GHES 2
-      baseUrl: https://git.hub.vwgroup.com/
+      baseUrl: https://ghes2.company.com
       appIdEnv: GHES2_APP_ID
       privateKeyEnv: GHES2_PRIVATE_KEY
       webhookSecretEnv: GHES2_WEBHOOK_SECRET
