@@ -93,13 +93,13 @@ app:
   instancesConfigPath: /app/config/instances.json
   extraEnv: []
   instances:
-    - key: vwg
+    - key: ghes1
       name: GHES 1
       baseUrl: https://vwg.ghe.com/
       appIdEnv: GHES1_APP_ID
       privateKeyEnv: GHES1_PRIVATE_KEY
       webhookSecretEnv: GHES1_WEBHOOK_SECRET
-    - key: cariad
+    - key: ghes2
       name: GHES 2
       baseUrl: https://git.hub.vwgroup.com/
       appIdEnv: GHES2_APP_ID
