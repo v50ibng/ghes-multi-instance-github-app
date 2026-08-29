@@ -275,16 +275,27 @@ The repository now includes two Dockerfiles:
 
 `Dockerfile.local` is optimized for local development:
 
-- uses the existing workspace dependencies,
+- installs dependencies inside the container,
 - runs the TypeScript app with `npm run dev`,
 - runs as the non-root `node` user,
 - keeps the GHES config path consistent with local development.
 
-Build:
+Build with the default public npm registry:
 
 ```bash
-npm install
 docker build -f Dockerfile.local -t ghes-multi-instance-github-app:local .
+```
+
+Build against the internal JFrog-backed registry:
+
+```bash
+docker build -f Dockerfile.local \
+  --build-arg DOCKER_REGISTRY=jfrog.hub.vwgroup.com/remote-docker-io \
+  --build-arg NODE_VERSION=22.14.0-bookworm-slim \
+  --build-arg NPM_REGISTRY=https://jfrog.devstack.vwgroup.com/artifactory/api/npm/npm-public/ \
+  --secret id=devstack_user,env=DEVSTACK_USER \
+  --secret id=devstack_secret,env=DEVSTACK_SECRET \
+  -t ghes-multi-instance-github-app:local .
 ```
 
 Run:
