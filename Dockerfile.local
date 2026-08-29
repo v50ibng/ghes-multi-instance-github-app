@@ -1,0 +1,26 @@
+ARG DOCKER_REGISTRY="docker.io/library"
+ARG NODE_VERSION="22-bookworm-slim"
+
+FROM ${DOCKER_REGISTRY}/node:${NODE_VERSION}
+
+WORKDIR /app
+
+ENV NODE_ENV=development \
+    PORT=3000 \
+    GHES_INSTANCES_CONFIG_PATH=/app/config/instances.json
+
+COPY package.json package-lock.json ./
+COPY node_modules ./node_modules
+COPY tsconfig.json ./
+COPY src ./src
+COPY tests ./tests
+COPY config ./config
+COPY .env.example ./.env.example
+
+RUN chown -R node:node /app
+
+USER node
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]

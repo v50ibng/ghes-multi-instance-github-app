@@ -29,7 +29,8 @@ src/
 tests/          # Focused runtime/unit tests
 config/         # GHES instance registry
 charts/         # Helm chart for Kubernetes deployment
-Dockerfile      # Multi-stage production container image
+Dockerfile.local
+Dockerfile.production
 ```
 
 ## Configuration model
@@ -265,24 +266,28 @@ Simple health endpoint.
 
 ## Docker
 
-The repository includes a production-oriented `Dockerfile` that:
+The repository now includes two Dockerfiles:
 
-- packages prebuilt runtime artifacts from the local or CI workspace,
-- prunes dev dependencies inside the image before startup,
+- `Dockerfile.local` for local development
+- `Dockerfile.production` for production or CI image builds
+
+### Local development image
+
+`Dockerfile.local` is optimized for local development:
+
+- uses the existing workspace dependencies,
+- runs the TypeScript app with `npm run dev`,
 - runs as the non-root `node` user,
-- keeps the runtime image limited to production artifacts.
+- keeps the GHES config path consistent with local development.
 
-### Build the image
+Build:
 
 ```bash
 npm install
-npm run build
-docker build -t ghes-multi-instance-github-app:local .
+docker build -f Dockerfile.local -t ghes-multi-instance-github-app:local .
 ```
 
-Build the image from a Linux workspace or CI runner so the packaged `node_modules` match the target container platform.
-
-### Run the container
+Run:
 
 ```bash
 docker run --rm -p 3000:3000 \
@@ -290,15 +295,56 @@ docker run --rm -p 3000:3000 \
   ghes-multi-instance-github-app:local
 ```
 
-The image bundles the sample `config/instances.json`. Override it by mounting your own file and setting `GHES_INSTANCES_CONFIG_PATH` if needed.
+### Production image
 
-Example:
+`Dockerfile.production` is the production-oriented image:
+
+- uses a multi-stage build,
+- installs dependencies in the builder image,
+- supports private registry authentication through build args,
+- removes dev dependencies before the runtime image,
+- keeps registry credentials out of the final image,
+- runs as the non-root `node` user.
+
+Build with the default public npm registry:
+
+```bash
+docker build -f Dockerfile.production \
+  --build-arg DOCKER_REGISTRY=docker.io/library \
+  --build-arg NODE_VERSION=22-bookworm-slim \
+  --build-arg NPM_REGISTRY=https://registry.npmjs.org/ \
+  -t ghes-multi-instance-github-app:prod .
+```
+
+Build with the JFrog-backed settings from your environment:
+
+```bash
+docker build -f Dockerfile.production \
+  --build-arg DOCKER_REGISTRY=jfrog.hub.vwgroup.com/remote-docker-io \
+  --build-arg NODE_VERSION=22.14.0-bookworm-slim \
+  --build-arg NPM_REGISTRY=https://jfrog.devstack.vwgroup.com/artifactory/api/npm/npm-public/ \
+  --secret id=devstack_user,env=DEVSTACK_USER \
+  --secret id=devstack_secret,env=DEVSTACK_SECRET \
+  -t ghes-multi-instance-github-app:prod .
+```
+
+The production Dockerfile uses BuildKit secrets for registry credentials so the credentials are available only during the dependency installation layer and are not baked into the final image.
+
+Run:
+
+```bash
+docker run --rm -p 3000:3000 \
+  --env-file .env \
+  ghes-multi-instance-github-app:prod
+```
+
+The runtime image bundles `config/instances.json`. Override it by mounting your own file and setting `GHES_INSTANCES_CONFIG_PATH` if needed:
 
 ```bash
 docker run --rm -p 3000:3000 \
   --env-file .env \
   -v "$(pwd)/config/instances.json:/app/config/instances.json:ro" \
-  ghes-multi-instance-github-app:local
+  ghes-multi-instance-github-app:prod
 ```
 
 ## Helm chart
