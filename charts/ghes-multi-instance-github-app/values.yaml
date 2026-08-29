@@ -1,11 +1,12 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/v50ibng/ghes-multi-instance-github-app
+  repository: jfrog.hub.vwgroup.com/columbus-data-platform-docker-releases/github-app
   pullPolicy: IfNotPresent
-  tag: ""
+  tag: "v1"
 
-imagePullSecrets: []
+imagePullSecrets: 
+  - name: vault-devhub-artifactory-pull-secret
 nameOverride: ""
 fullnameOverride: ""
 
@@ -19,9 +20,6 @@ podLabels: {}
 
 podSecurityContext:
   runAsNonRoot: true
-  runAsUser: 1000
-  runAsGroup: 1000
-  fsGroup: 1000
 
 securityContext:
   allowPrivilegeEscalation: false
@@ -35,11 +33,11 @@ service:
   port: 3000
 
 ingress:
-  enabled: false
-  className: ""
+  enabled: true
+  className: "openshift-default"
   annotations: {}
   hosts:
-    - host: ghes-app.local
+    - host: dev.github.apps.columbus.apps.dev-intranet-02-wob.ocp.vwgroup.com
       paths:
         - path: /
           pathType: Prefix
@@ -71,15 +69,15 @@ app:
   instancesConfigPath: /app/config/instances.json
   extraEnv: []
   instances:
-    - key: ghes1
+    - key: vwg
       name: GHES 1
-      baseUrl: https://ghes1.company.com
+      baseUrl: https://vwg.ghe.com/
       appIdEnv: GHES1_APP_ID
       privateKeyEnv: GHES1_PRIVATE_KEY
       webhookSecretEnv: GHES1_WEBHOOK_SECRET
-    - key: ghes2
+    - key: cariad
       name: GHES 2
-      baseUrl: https://ghes2.company.com
+      baseUrl: https://git.hub.vwgroup.com/
       appIdEnv: GHES2_APP_ID
       privateKeyEnv: GHES2_PRIVATE_KEY
       webhookSecretEnv: GHES2_WEBHOOK_SECRET
@@ -88,9 +86,9 @@ credentials:
   existingSecret: ""
   create: true
   data:
-    GHES1_APP_ID: ""
-    GHES1_PRIVATE_KEY: ""
-    GHES1_WEBHOOK_SECRET: ""
-    GHES2_APP_ID: ""
-    GHES2_PRIVATE_KEY: ""
-    GHES2_WEBHOOK_SECRET: ""
+    GHES1_APP_ID: "11"
+    GHES1_PRIVATE_KEY: "Dummy"
+    GHES1_WEBHOOK_SECRET: "Dummy"
+    GHES2_APP_ID: "1"
+    GHES2_PRIVATE_KEY: "Dummy"
+    GHES2_WEBHOOK_SECRET: "Dummy"

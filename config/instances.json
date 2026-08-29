@@ -1,7 +1,7 @@
 {
   "instances": [
     {
-      "key": "ghes1",
+      "key": "S",
       "name": "GHES 1",
       "baseUrl": "https://ghes1.company.com",
       "appIdEnv": "GHES1_APP_ID",
@@ -9,7 +9,7 @@
       "webhookSecretEnv": "GHES1_WEBHOOK_SECRET"
     },
     {
-      "key": "ghes2",
+      "key": "cariad",
       "name": "GHES 2",
       "baseUrl": "https://ghes2.company.com",
       "appIdEnv": "GHES2_APP_ID",
