@@ -28,6 +28,8 @@ src/
   utils/        # Logger, errors, helpers
 tests/          # Focused runtime/unit tests
 config/         # GHES instance registry
+charts/         # Helm chart for Kubernetes deployment
+Dockerfile      # Multi-stage production container image
 ```
 
 ## Configuration model
@@ -260,6 +262,119 @@ Simple health endpoint.
    npm run build
    npm start
    ```
+
+## Docker
+
+The repository includes a production-oriented `Dockerfile` that:
+
+- packages prebuilt runtime artifacts from the local or CI workspace,
+- runs as the non-root `node` user,
+- keeps the runtime image limited to production artifacts.
+
+### Build the image
+
+```bash
+npm install
+npm run build
+docker build -t ghes-multi-instance-github-app:local .
+```
+
+### Run the container
+
+```bash
+docker run --rm -p 3000:3000 \
+  --env-file .env \
+  ghes-multi-instance-github-app:local
+```
+
+The image bundles the sample `config/instances.json`. Override it by mounting your own file and setting `GHES_INSTANCES_CONFIG_PATH` if needed.
+
+Example:
+
+```bash
+docker run --rm -p 3000:3000 \
+  --env-file .env \
+  -v "$(pwd)/config/instances.json:/app/config/instances.json:ro" \
+  ghes-multi-instance-github-app:local
+```
+
+## Helm chart
+
+The repository includes a Helm chart at:
+
+```text
+charts/ghes-multi-instance-github-app
+```
+
+The chart follows the same runtime design as the Node.js app:
+
+- GHES instance metadata is rendered into a ConfigMap as `instances.json`.
+- Sensitive App IDs, private keys, and webhook secrets are supplied through a Kubernetes Secret.
+- The Deployment mounts `instances.json` into `/app/config/instances.json`.
+- Liveness and readiness probes use `GET /health`.
+
+### Key Helm values
+
+- `image.repository`, `image.tag`: container image to deploy
+- `app.instances`: list of GHES instances to render into `instances.json`
+- `credentials.existingSecret`: use an already-managed Secret instead of creating one
+- `credentials.data`: secret values if you want Helm to create the Secret
+- `ingress.enabled`: expose the service externally
+
+### Install with Helm
+
+```bash
+helm upgrade --install ghes-app ./charts/ghes-multi-instance-github-app
+```
+
+### Install with an existing Secret
+
+Create a secret that contains the environment variables referenced by `app.instances`:
+
+```bash
+kubectl create secret generic ghes-app-credentials \
+  --from-literal=GHES1_APP_ID=100001 \
+  --from-literal=GHES1_WEBHOOK_SECRET=replace-with-ghes1-webhook-secret \
+  --from-literal=GHES2_APP_ID=100002 \
+  --from-literal=GHES2_WEBHOOK_SECRET=replace-with-ghes2-webhook-secret \
+  --from-file=GHES1_PRIVATE_KEY=/path/to/ghes1.private-key.pem \
+  --from-file=GHES2_PRIVATE_KEY=/path/to/ghes2.private-key.pem
+```
+
+Then install:
+
+```bash
+helm upgrade --install ghes-app ./charts/ghes-multi-instance-github-app \
+  --set credentials.create=false \
+  --set credentials.existingSecret=ghes-app-credentials
+```
+
+### Example Helm values override
+
+```yaml
+image:
+  repository: ghcr.io/v50ibng/ghes-multi-instance-github-app
+  tag: "latest"
+
+app:
+  instances:
+   - key: ghes1
+     name: GHES 1
+     baseUrl: https://ghes1.company.com
+     appIdEnv: GHES1_APP_ID
+     privateKeyEnv: GHES1_PRIVATE_KEY
+     webhookSecretEnv: GHES1_WEBHOOK_SECRET
+   - key: ghes2
+     name: GHES 2
+     baseUrl: https://ghes2.company.com
+     appIdEnv: GHES2_APP_ID
+     privateKeyEnv: GHES2_PRIVATE_KEY
+     webhookSecretEnv: GHES2_WEBHOOK_SECRET
+
+credentials:
+  create: false
+  existingSecret: ghes-app-credentials
+```
 
 ## curl examples
 

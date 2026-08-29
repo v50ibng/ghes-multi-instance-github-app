@@ -1,0 +1,96 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/v50ibng/ghes-multi-instance-github-app
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false
+
+service:
+  type: ClusterIP
+  port: 3000
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: ghes-app.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+app:
+  logLevel: info
+  instancesConfigPath: /app/config/instances.json
+  extraEnv: []
+  instances:
+    - key: ghes1
+      name: GHES 1
+      baseUrl: https://ghes1.company.com
+      appIdEnv: GHES1_APP_ID
+      privateKeyEnv: GHES1_PRIVATE_KEY
+      webhookSecretEnv: GHES1_WEBHOOK_SECRET
+    - key: ghes2
+      name: GHES 2
+      baseUrl: https://ghes2.company.com
+      appIdEnv: GHES2_APP_ID
+      privateKeyEnv: GHES2_PRIVATE_KEY
+      webhookSecretEnv: GHES2_WEBHOOK_SECRET
+
+credentials:
+  existingSecret: ""
+  create: true
+  data:
+    GHES1_APP_ID: ""
+    GHES1_PRIVATE_KEY: ""
+    GHES1_WEBHOOK_SECRET: ""
+    GHES2_APP_ID: ""
+    GHES2_PRIVATE_KEY: ""
+    GHES2_WEBHOOK_SECRET: ""
