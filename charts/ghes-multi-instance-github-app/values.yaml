@@ -33,10 +33,10 @@ service:
 
 ingress:
   enabled: true
-  className: "openshift-default"
+  className: ""
   annotations: {}
   hosts:
-    - host: dev.github.apps.columbus.apps.dev-intranet-02-wob.ocp.vwgroup.com
+    - host: chart-example.local
       paths:
         - path: /
           pathType: Prefix

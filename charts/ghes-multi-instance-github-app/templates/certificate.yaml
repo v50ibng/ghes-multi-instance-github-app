@@ -43,13 +43,13 @@ spec:
   usages:
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- with .Values.certificate.subject }}
+  {{- if or (gt (len .Values.certificate.subject.countries) 0) (gt (len .Values.certificate.subject.organizations) 0) }}
   subject:
-    {{- with .countries }}
+    {{- with .Values.certificate.subject.countries }}
     countries:
       {{- toYaml . | nindent 6 }}
     {{- end }}
-    {{- with .organizations }}
+    {{- with .Values.certificate.subject.organizations }}
     organizations:
       {{- toYaml . | nindent 6 }}
     {{- end }}
