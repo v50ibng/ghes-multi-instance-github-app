@@ -440,6 +440,8 @@ credentials:
   existingSecret: ghes-app-credentials
 ```
 
+If you deploy from an internal registry, override `image.repository` and `imagePullSecrets` for your environment.
+
 ### Example cert-manager configuration
 
 If you want the chart to create a `Certificate` and automatically associate it with the ingress, set:

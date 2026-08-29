@@ -1,12 +1,11 @@
 replicaCount: 1
 
 image:
-  repository: jfrog.hub.vwgroup.com/columbus-data-platform-docker-releases/github-app
+  repository: ghcr.io/v50ibng/ghes-multi-instance-github-app
   pullPolicy: IfNotPresent
   tag: "v1"
 
-imagePullSecrets: 
-  - name: vault-devhub-artifactory-pull-secret
+imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
