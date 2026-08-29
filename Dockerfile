@@ -10,7 +10,9 @@ COPY node_modules ./node_modules
 COPY dist ./dist
 COPY config ./config
 
-RUN chown -R node:node /app
+RUN npm prune --omit=dev --no-audit \
+    && npm cache clean --force \
+    && chown -R node:node /app
 USER node
 
 EXPOSE 3000

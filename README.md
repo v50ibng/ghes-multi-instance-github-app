@@ -268,6 +268,7 @@ Simple health endpoint.
 The repository includes a production-oriented `Dockerfile` that:
 
 - packages prebuilt runtime artifacts from the local or CI workspace,
+- prunes dev dependencies inside the image before startup,
 - runs as the non-root `node` user,
 - keeps the runtime image limited to production artifacts.
 
@@ -278,6 +279,8 @@ npm install
 npm run build
 docker build -t ghes-multi-instance-github-app:local .
 ```
+
+Build the image from a Linux workspace or CI runner so the packaged `node_modules` match the target container platform.
 
 ### Run the container
 
