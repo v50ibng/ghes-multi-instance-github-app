@@ -357,7 +357,7 @@ helm upgrade --install ghes-app ./charts/ghes-multi-instance-github-app \
 ```yaml
 image:
   repository: ghcr.io/v50ibng/ghes-multi-instance-github-app
-  tag: "latest"
+  tag: "1.0.0"
 
 app:
   instances:
