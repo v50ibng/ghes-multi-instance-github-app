@@ -371,6 +371,7 @@ The chart follows the same runtime design as the Node.js app:
 - GHES instance metadata is rendered into a ConfigMap as `instances.json`.
 - Sensitive App IDs, private keys, and webhook secrets are supplied through a Kubernetes Secret.
 - The Deployment mounts `instances.json` into `/app/config/instances.json`.
+- The chart can optionally create a cert-manager `Certificate` and wire its secret into the Ingress TLS block.
 - Liveness and readiness probes use `GET /health`.
 
 ### Key Helm values
@@ -380,6 +381,7 @@ The chart follows the same runtime design as the Node.js app:
 - `credentials.existingSecret`: use an already-managed Secret instead of creating one
 - `credentials.data`: secret values if you want Helm to create the Secret
 - `ingress.enabled`: expose the service externally
+- `certificate.enabled`: create a cert-manager `Certificate` for the ingress hosts
 
 ### Install with Helm
 
@@ -434,6 +436,57 @@ app:
 credentials:
   create: false
   existingSecret: ghes-app-credentials
+```
+
+### Example cert-manager configuration
+
+If you want the chart to create a `Certificate` and automatically associate it with the ingress, set:
+
+```yaml
+ingress:
+  enabled: true
+  className: openshift-default
+  hosts:
+    - host: dev.github.apps.columbus.apps.dev-intranet-02-wob.ocp.vwgroup.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+certificate:
+  enabled: true
+  name: dev-github-app-certificate
+  secretName: dev-github-app-certs-tls
+  issuerRef:
+    group: tcrp-issuer.caas.vwgroup.com
+    kind: ClusterIssuer
+    name: vwpki-prod
+  commonName: dev.github.apps.columbus.apps.dev-intranet-02-wob.ocp.vwgroup.com
+  dnsNames:
+    - dev.github.apps.columbus.apps.dev-intranet-02-wob.ocp.vwgroup.com
+  duration: 2160h0m0s
+  renewBefore: 720h0m0s
+  privateKey:
+    algorithm: ECDSA
+    encoding: PKCS1
+    rotationPolicy: Always
+    size: 384
+  subject:
+    countries:
+      - DE
+    organizations:
+      - VOLKSWAGEN AG
+  usages:
+    - server auth
+    - client auth
+```
+
+When `certificate.enabled=true` and `ingress.tls` is left empty, the chart automatically adds this TLS section to the ingress:
+
+```yaml
+tls:
+  - secretName: dev-github-app-certs-tls
+    hosts:
+      - dev.github.apps.columbus.apps.dev-intranet-02-wob.ocp.vwgroup.com
 ```
 
 ## curl examples

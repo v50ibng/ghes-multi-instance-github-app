@@ -1,0 +1,74 @@
+{{- if .Values.certificate.enabled }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "ghes-multi-instance-github-app.certificateName" . }}
+  labels:
+    {{- include "ghes-multi-instance-github-app.labels" . | nindent 4 }}
+    {{- with .Values.certificate.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.certificate.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  secretName: {{ include "ghes-multi-instance-github-app.certificateSecretName" . }}
+  {{- if .Values.certificate.commonName }}
+  commonName: {{ .Values.certificate.commonName | quote }}
+  {{- else if gt (len .Values.ingress.hosts) 0 }}
+  commonName: {{ (index .Values.ingress.hosts 0).host | quote }}
+  {{- end }}
+  dnsNames:
+    {{- if .Values.certificate.dnsNames }}
+    {{- toYaml .Values.certificate.dnsNames | nindent 4 }}
+    {{- else }}
+    {{- range .Values.ingress.hosts }}
+    - {{ .host | quote }}
+    {{- end }}
+    {{- end }}
+  issuerRef:
+    name: {{ .Values.certificate.issuerRef.name | quote }}
+    kind: {{ .Values.certificate.issuerRef.kind | quote }}
+    {{- with .Values.certificate.issuerRef.group }}
+    group: {{ . | quote }}
+    {{- end }}
+  {{- with .Values.certificate.duration }}
+  duration: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.certificate.renewBefore }}
+  renewBefore: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.certificate.usages }}
+  usages:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with .Values.certificate.subject }}
+  subject:
+    {{- with .countries }}
+    countries:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .organizations }}
+    organizations:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+  {{- end }}
+  {{- with .Values.certificate.privateKey }}
+  {{- if or .algorithm .encoding .rotationPolicy .size }}
+  privateKey:
+    {{- with .algorithm }}
+    algorithm: {{ . | quote }}
+    {{- end }}
+    {{- with .encoding }}
+    encoding: {{ . | quote }}
+    {{- end }}
+    {{- with .rotationPolicy }}
+    rotationPolicy: {{ . | quote }}
+    {{- end }}
+    {{- with .size }}
+    size: {{ . }}
+    {{- end }}
+  {{- end }}
+  {{- end }}
+{{- end }}

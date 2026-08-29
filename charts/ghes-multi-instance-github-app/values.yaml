@@ -43,6 +43,30 @@ ingress:
           pathType: Prefix
   tls: []
 
+certificate:
+  enabled: false
+  name: ""
+  secretName: ""
+  annotations: {}
+  labels: {}
+  commonName: ""
+  dnsNames: []
+  duration: ""
+  renewBefore: ""
+  issuerRef:
+    group: ""
+    kind: ClusterIssuer
+    name: ""
+  privateKey:
+    algorithm: ""
+    encoding: ""
+    rotationPolicy: ""
+    size: null
+  subject:
+    countries: []
+    organizations: []
+  usages: []
+
 resources:
   requests:
     cpu: 100m

@@ -13,9 +13,16 @@ spec:
   {{- if .Values.ingress.className }}
   ingressClassName: {{ .Values.ingress.className }}
   {{- end }}
-  {{- with .Values.ingress.tls }}
+  {{- if .Values.ingress.tls }}
   tls:
-    {{- toYaml . | nindent 4 }}
+    {{- toYaml .Values.ingress.tls | nindent 4 }}
+  {{- else if and .Values.certificate.enabled .Values.ingress.enabled }}
+  tls:
+    - secretName: {{ include "ghes-multi-instance-github-app.certificateSecretName" . }}
+      hosts:
+        {{- range .Values.ingress.hosts }}
+        - {{ .host | quote }}
+        {{- end }}
   {{- end }}
   rules:
     {{- range .Values.ingress.hosts }}

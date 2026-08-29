@@ -47,3 +47,11 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- printf "%s-credentials" (include "ghes-multi-instance-github-app.fullname" .) -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "ghes-multi-instance-github-app.certificateName" -}}
+{{- default (printf "%s-certificate" (include "ghes-multi-instance-github-app.fullname" .)) .Values.certificate.name -}}
+{{- end -}}
+
+{{- define "ghes-multi-instance-github-app.certificateSecretName" -}}
+{{- default (printf "%s-tls" (include "ghes-multi-instance-github-app.fullname" .)) .Values.certificate.secretName -}}
+{{- end -}}
