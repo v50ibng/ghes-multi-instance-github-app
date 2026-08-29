@@ -31,15 +31,15 @@ RUN --mount=type=secret,id=devstack_user,required=false \
       printf '%s\n' "${auth_config}" | awk -v prefix="${registry_auth_prefix}" '{print prefix ":" $0}' >> /root/.npmrc; \
       npm config fix; \
     fi; \
-    npm ci
+    npm ci; \
+    rm -f /root/.npmrc
 
 COPY tsconfig.json ./
 COPY src ./src
 COPY config ./config
 
 RUN npm run build \
-    && npm prune --omit=dev \
-    && rm -f /root/.npmrc
+    && npm prune --omit=dev
 
 FROM ${DOCKER_REGISTRY}/node:${NODE_VERSION} AS production-stage
 
