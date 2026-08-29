@@ -24,7 +24,8 @@ RUN --mount=type=secret,id=devstack_user,required=false \
       DEVSTACK_USER="$(cat /run/secrets/devstack_user)"; \
       DEVSTACK_SECRET="$(cat /run/secrets/devstack_secret)"; \
       auth_config="$(curl -fsSL -u "${DEVSTACK_USER}:${DEVSTACK_SECRET}" "${NPM_AUTH_URL}")"; \
-      printf '%s\n' "${auth_config}" > /root/.npmrc; \
+      printf 'registry=%s\n' "${NPM_REGISTRY}" > /root/.npmrc; \
+      printf '%s\n' "${auth_config}" >> /root/.npmrc; \
       npm config set @group-ui:registry "${GROUP_UI_REGISTRY}"; \
       printf '%s\n' "${auth_config}" | awk '{print "//jfrog.devstack.vwgroup.com/artifactory/api/npm/groupui-npm/:" $0}' >> /root/.npmrc; \
       npm config fix; \
