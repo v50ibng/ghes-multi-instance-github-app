@@ -6,18 +6,4 @@ metadata:
     {{- include "ghes-multi-instance-github-app.labels" . | nindent 4 }}
 data:
   instances.json: |
-    {
-      "instances": [
-        {{- range $index, $instance := .Values.app.instances }}
-        {{- if $index }},{{ end }}
-        {
-          "key": {{ $instance.key | toJson }},
-          "name": {{ $instance.name | toJson }},
-          "baseUrl": {{ $instance.baseUrl | toJson }},
-          "appIdEnv": {{ $instance.appIdEnv | toJson }},
-          "privateKeyEnv": {{ $instance.privateKeyEnv | toJson }},
-          "webhookSecretEnv": {{ $instance.webhookSecretEnv | toJson }}
-        }
-        {{- end }}
-      ]
-    }
+{{ dict "instances" .Values.app.instances | toPrettyJson | nindent 4 }}

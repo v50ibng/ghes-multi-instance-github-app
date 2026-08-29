@@ -43,8 +43,10 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- define "ghes-multi-instance-github-app.credentialsSecretName" -}}
 {{- if .Values.credentials.existingSecret -}}
 {{- .Values.credentials.existingSecret -}}
-{{- else -}}
+{{- else if .Values.credentials.create -}}
 {{- printf "%s-credentials" (include "ghes-multi-instance-github-app.fullname" .) -}}
+{{- else -}}
+{{- fail "credentials.existingSecret must be set when credentials.create=false" -}}
 {{- end -}}
 {{- end -}}
 
