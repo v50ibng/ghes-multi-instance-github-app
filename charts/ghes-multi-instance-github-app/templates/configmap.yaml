@@ -11,12 +11,12 @@ data:
         {{- range $index, $instance := .Values.app.instances }}
         {{- if $index }},{{ end }}
         {
-          "key": {{ $instance.key | quote }},
-          "name": {{ $instance.name | quote }},
-          "baseUrl": {{ $instance.baseUrl | quote }},
-          "appIdEnv": {{ $instance.appIdEnv | quote }},
-          "privateKeyEnv": {{ $instance.privateKeyEnv | quote }},
-          "webhookSecretEnv": {{ $instance.webhookSecretEnv | quote }}
+          "key": {{ $instance.key | toJson }},
+          "name": {{ $instance.name | toJson }},
+          "baseUrl": {{ $instance.baseUrl | toJson }},
+          "appIdEnv": {{ $instance.appIdEnv | toJson }},
+          "privateKeyEnv": {{ $instance.privateKeyEnv | toJson }},
+          "webhookSecretEnv": {{ $instance.webhookSecretEnv | toJson }}
         }
         {{- end }}
       ]
