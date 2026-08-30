@@ -1,0 +1,63 @@
+# syntax=docker/dockerfile:1.7
+ARG DOCKER_REGISTRY="jfrog.hub.vwgroup.com/remote-docker-io"
+ARG NODE_VERSION="22.14.0-bookworm-slim"
+
+FROM ${DOCKER_REGISTRY}/node:${NODE_VERSION} AS build-stage
+
+ARG NPM_REGISTRY="https://registry.npmjs.org/"
+ARG NPM_AUTH_URL="https://jfrog.devstack.vwgroup.com/artifactory/api/npm/auth"
+ARG GROUP_UI_REGISTRY="https://jfrog.devstack.vwgroup.com/artifactory/api/npm/groupui-npm/"
+
+WORKDIR /app
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl gawk ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY package.json package-lock.json ./
+
+RUN --mount=type=secret,id=devstack_user,required=false \
+    --mount=type=secret,id=devstack_secret,required=false \
+    set -eux; \
+    npm config set registry "${NPM_REGISTRY}"; \
+    if [ -f /run/secrets/devstack_user ] && [ -f /run/secrets/devstack_secret ]; then \
+      DEVSTACK_USER="$(cat /run/secrets/devstack_user)"; \
+      DEVSTACK_SECRET="$(cat /run/secrets/devstack_secret)"; \
+      auth_config="$(curl -fsSL -u "${DEVSTACK_USER}:${DEVSTACK_SECRET}" "${NPM_AUTH_URL}")"; \
+      registry_auth_prefix="$(printf '%s' "${GROUP_UI_REGISTRY}" | sed -E 's#^https?://#//#; s#/*$##')"; \
+      printf 'registry=%s\n' "${NPM_REGISTRY}" > /root/.npmrc; \
+      printf '%s\n' "${auth_config}" >> /root/.npmrc; \
+      npm config set @group-ui:registry "${GROUP_UI_REGISTRY}"; \
+      printf '%s\n' "${auth_config}" | awk -v prefix="${registry_auth_prefix}" '{print prefix ":" $0}' >> /root/.npmrc; \
+      npm config fix; \
+    fi; \
+    npm ci; \
+    rm -f /root/.npmrc
+
+COPY tsconfig.json ./
+COPY src ./src
+COPY config ./config
+
+RUN npm run build \
+    && npm prune --omit=dev
+
+FROM ${DOCKER_REGISTRY}/node:${NODE_VERSION} AS production-stage
+
+WORKDIR /app
+
+ENV NODE_ENV=production \
+    PORT=3000 \
+    GHES_INSTANCES_CONFIG_PATH=/app/config/instances.json
+
+COPY --from=build-stage /app/package.json /app/package-lock.json ./
+COPY --from=build-stage /app/node_modules ./node_modules
+COPY --from=build-stage /app/dist ./dist
+COPY --from=build-stage /app/config ./config
+
+RUN chown -R node:node /app
+
+USER node
+
+EXPOSE 3000
+
+CMD ["node", "dist/src/server.js"]

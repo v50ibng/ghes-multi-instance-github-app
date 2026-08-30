@@ -1,0 +1,7 @@
+apiVersion: v2
+name: ghes-multi-instance-github-app
+description: Deploy the multi-instance GHES GitHub App proof of concept
+home: https://github.com/v50ibng/ghes-multi-instance-github-app
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

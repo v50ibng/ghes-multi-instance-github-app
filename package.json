@@ -1,0 +1,40 @@
+{
+  "name": "ghes-multi-instance-github-app",
+  "version": "1.0.0",
+  "description": "Production-quality GitHub App PoC supporting multiple GitHub Enterprise Server instances via Node.js/TypeScript",
+  "main": "dist/src/server.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/src/server.js",
+    "test": "node --import tsx --test tests/**/*.test.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/v50ibng/ghes-multi-instance-github-app.git"
+  },
+  "keywords": [
+    "github-app",
+    "ghes",
+    "nodejs",
+    "typescript",
+    "octokit"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@octokit/auth-app": "^8.1.2",
+    "@octokit/rest": "^22.0.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.1.0",
+    "pino": "^10.0.0",
+    "pino-http": "^11.0.0",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.3.1",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  }
+}
